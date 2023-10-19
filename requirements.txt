@@ -1,9 +1,8 @@
-streamlit
-st_pages
-pickle
-dynamicTreeCut
-seaborn
-PIL
-matplotlib.pyplot
-pandas
+streamlit==1.26.0
+st-pages==0.4.5
+dynamicTreeCut==0.1.1
+Pillow==9.5.0
+matplotlib==3.8.0
+seaborn==0.13.0
 base64
+pickle
