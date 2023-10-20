@@ -58,7 +58,7 @@ with col1 :
     for i,j in zip(new_legend, data2['domTaxa'].values) :
         new_patch.append(mpatches.Patch(color = i, label = j))
 
-    g.legend(handles=new_patch, title = 'mgCSTs',loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 2)
+    g.legend(handles=new_patch, title = 'Dominant taxa',loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 2)
 
 
     g.grid(False)
