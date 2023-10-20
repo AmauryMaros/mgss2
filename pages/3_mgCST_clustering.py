@@ -1,16 +1,16 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from dynamicTreeCut import cutreeHybrid
 import seaborn as sns
 import numpy as np
+import matplotlib.patches as mpatches
+import matplotlib.colors as mcolors
 
 sns.set_theme(style="whitegrid", palette="cubehelix")
 
 subspecies_with_colors = pd.read_csv("Data/subspecies_with_colors.csv")
-
-mgcsts_samples = pd.read_csv("/Users/amaros/Desktop/mgss2/mgCSTs.samples.df2.csv")
-mgCSTs_sort = pd.read_csv("/Users/amaros/Desktop/mgss2/mgCSTs.sort.df2.csv")
+mgcsts_samples = pd.read_csv("Data/mgCSTs.samples.df.csv")
+mgCSTs_sort = pd.read_csv("Data/mgCSTs.sort.df.csv")
 projects = pd.read_csv("Data/VIRGO2_projects.csv")
 
 
@@ -46,12 +46,21 @@ st.subheader("Clustering parameters")
 col1, col2 = st.columns(2)
 
 with col1 :
-    g = sns.barplot(x = 'mgCST', y = 'count_sample', data = data2 , legend = True, hue = 'domTaxa', palette=list(data2['color']))
+    g = sns.barplot(x = 'mgCST', y = 'count_sample', data = data2 , legend = True, hue = 'mgCST', palette=list(data2['color']))
     fig1 = g.figure
     plt.xlabel("mgCSTs")
     plt.ylabel("Number of samples")
     g.tick_params(axis='x', which='major', labelsize= 8, labelrotation=70)
-    g.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 2)
+    # g.legend(title = "Dominant Taxa", loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 2)
+    new_legend = data2['color'].apply(lambda x : mcolors.to_rgba(x)).values
+
+    new_patch = []
+    for i,j in zip(new_legend, data2['domTaxa'].values) :
+        new_patch.append(mpatches.Patch(color = i, label = j))
+
+    g.legend(handles=new_patch, title = 'mgCSTs',loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 2)
+
+
     g.grid(False)
     st.pyplot(fig1)
 
@@ -77,21 +86,22 @@ with st.expander("See tables"):
     st.dataframe(data2[['mgCST','domTaxa','meanRelabund','color']])
 
 
-st.subheader("Colors signification")
-with st.expander("See colors"):
-    col1, col2 = st.columns(2)
-    a = int(len(data2['domTaxa'].unique())/2)
+# st.subheader("Colors signification")
+# with st.expander("See colors"):
+#     col1, col2 = st.columns(2)
+#     a = int(len(data2['domTaxa'].unique())/2)
 
-    with col1 :
-        i = 0
-        for taxa in (data2['domTaxa'].unique()[:a+1]) :
-            color_taxa = data2['color'][data2['domTaxa'] == taxa].values[0]
-            color = st.color_picker(taxa, color_taxa, key=i)
-            i+=1
+#     with col1 :
+#         i = 0
+#         for taxa in (data2['domTaxa'].unique()[:a+1]) :
+#             color_taxa = data2['color'][data2['domTaxa'] == taxa].values[0]
+#             mgCST = data2[data2['domTaxa'] == taxa]['mgCST'].values[0]
+#             color = st.color_picker(taxa, color_taxa, key=i)
+#             i+=1
 
-    with col2 :
-        i = -1
-        for taxa in data2['domTaxa'].unique()[-a:] :
-            color_taxa = data2['color'][data2['domTaxa'] == taxa].values[0]
-            color = st.color_picker(taxa, color_taxa, key=i*2)
-            i-=1
+#     with col2 :
+#         i = -1
+#         for taxa in data2['domTaxa'].unique()[-a:] :
+#             color_taxa = data2['color'][data2['domTaxa'] == taxa].values[0]
+#             color = st.color_picker(taxa, color_taxa, key=i*2)
+#             i-=1

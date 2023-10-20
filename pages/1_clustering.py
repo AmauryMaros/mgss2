@@ -5,13 +5,13 @@ import pickle
 from dynamicTreeCut import cutreeHybrid
 import seaborn as sns
 
-with open("/Users/amaros/Desktop/mgss2/streamlit_app/Data/samples_dist.pkl", "rb") as file:
+with open("Data/samples_dist.pkl", "rb") as file:
     samples_dist = pickle.load(file)
 
-with open("/Users/amaros/Desktop/mgss2/streamlit_app/Data/samples_hc.pkl", "rb") as file:
+with open("Data/samples_hc.pkl", "rb") as file:
     samples_hc = pickle.load(file)
 
-mgss_coverage = pd.read_csv("/Users/amaros/Desktop/mgss2/streamlit_app/Data/mgSs.coverage.stats.csv").rename(columns={"Unnamed: 0" : "sub_species", "as.factor(sample_cluster)" : "sample_cluster"})
+mgss_coverage = pd.read_csv("Data/mgSs.coverage.stats.csv").rename(columns={"Unnamed: 0" : "sub_species", "as.factor(sample_cluster)" : "sample_cluster"})
 species = mgss_coverage['sub_species'].apply(lambda x : x.split(".")[0]).unique()
 
 st.sidebar.subheader("Parameters")
