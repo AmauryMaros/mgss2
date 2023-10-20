@@ -17,11 +17,11 @@ with tab1:
         
         col1, col2 = st.columns(2)
         with col1 :
-            fig1 = Image.open("Medias/mgSs_coverage/" + option + "_subspecies_coverage_boxplot.png") 
+            fig1 = Image.open("Medias/mgss_coverage_png/" + option + "_subspecies_coverage_boxplot.png") 
             st.image(fig1)
 
         with col2 :
-            fig2 = Image.open("Medias/mgSs_coverage/" + option + "_subspecies_coverage_by_NoGenes.png")
+            fig2 = Image.open("Medias/mgss_coverage_png/" + option + "_subspecies_coverage_by_NoGenes.png")
             st.image(fig2)
 
 with tab2 :

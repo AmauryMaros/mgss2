@@ -3,8 +3,8 @@
 "Aerococcus_christensenii",20,0,-0.00124186917787802,6,0,779
 "Alloprevotella_sp905369775",0,0,0,1,0,30
 "Alloscardovia_omnicolens",0,0,0,1,0,25
-"Alterileibacterium",19,0,0.760221770697434,2,0,29
-"Anaerococcus",15,0,0.089562640543847,4,0,109
+"Alterileibacterium",0,0,0,1,0,29
+"Anaerococcus",0,0,0,1,0,109
 "Anaerococcus_mediterraneensis",20,0,0.115319814059172,2,0,42
 "Anaerococcus_prevotii",0,0,0,1,0,26
 "Anaerococcus_sp900258475",0,0,0,1,0,44
@@ -20,11 +20,11 @@
 "Brevibacterium_sp001815905",20,0,0.0896724097923776,2,0,40
 "Bulleidia_spNov1",13,3,-0.0357749363481353,9,0,279
 "CAJPTP01",0,0,0,1,0,22
-"Campylobacter",20,0,0.676862571421182,2,0,45
+"Campylobacter",0,0,0,1,0,45
 "Campylobacter_ureolyticus",0,0,0,1,0,37
 "Candida_albicans",20,0,0.133030616143187,2,0,71
 "Chlamydia_trachomatis",0,0,0,1,0,24
-"Corynebacterium",20,0,0.0883618020381792,3,0,281
+"Corynebacterium",0,0,0,1,0,281
 "Corynebacterium_amycolatum",0,0,0,1,0,56
 "Corynebacterium_aurimucosum",0,0,0,1,0,33
 "Corynebacterium_coyleae",0,0,0,1,0,29
@@ -52,7 +52,7 @@
 "Finegoldia_magna",20,0,0.106763336546141,3,0,330
 "Fusobacterium_animalis",20,0,0.175260035098076,2,0,42
 "Fusobacterium_gonidiaformans",0,0,0,1,0,20
-"Gardnerella",20,0,0.0613384405530142,3,0,526
+"Gardnerella",0,0,0,1,0,526
 "Gardnerella_leopoldii",10,4,0.00345794569283705,10,0,220
 "Gardnerella_piotii",20,1,0.0683794200114769,5,0,1127
 "Gardnerella_sp003585735",20,0,0.145487833469778,3,0,177
@@ -119,7 +119,7 @@
 "Porphyromonas_sp001808555",11,0,0.106988101134024,3,0,62
 "Porphyromonas_spNov1",0,0,0,1,0,25
 "Porphyromonas_uenonis",20,0,0.11033733314813,4,0,243
-"Prevotella",20,0,0.036477823063838,3,0,678
+"Prevotella",0,0,0,1,0,678
 "Prevotella_amnii",10,0,0.0805152577939395,7,0,610
 "Prevotella_bivia",11,0,0.0369033477548781,7,0,370
 "Prevotella_colorans",10,2,0.0418469577340154,5,0,128
@@ -146,7 +146,7 @@
 "Staphylococcus_haemolyticus",0,0,0,1,0,23
 "Stomatobaculum_naviforme",0,0,0,1,0,25
 "Stomatobaculum_sp002892395",20,0,0.148259981377158,3,0,159
-"Streptococcus",20,0,0.335251778483327,2,0,45
+"Streptococcus",0,0,0,1,0,45
 "Streptococcus_agalactiae",20,0,0.212472912193325,3,0,105
 "Streptococcus_anginosus",20,0,0.0396362027463367,3,0,190
 "Streptococcus_mitis",20,0,0.213987559705957,2,0,126
