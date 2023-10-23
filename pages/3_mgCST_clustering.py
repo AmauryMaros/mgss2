@@ -5,8 +5,10 @@ import seaborn as sns
 import numpy as np
 import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
+import subprocess
+import base64  
 
-sns.set_theme(style="whitegrid", palette="cubehelix")
+# sns.set_theme(style="whitegrid", palette="cubehelix")
 
 subspecies_with_colors = pd.read_csv("Data/subspecies_with_colors.csv")
 mgcsts_samples = pd.read_csv("Data/mgCSTs.samples.df.csv")
@@ -18,11 +20,17 @@ st.sidebar.subheader("Parameters")
 deepsplit = st.sidebar.slider(label="deepSplit", min_value=0, max_value=4)
 mincluster = st.sidebar.slider(label="minClusterSize", min_value=10, max_value=50)
 
+# # Save parameters into a csv file for the execution of Rscript to built the heatmap
+# parameters = pd.DataFrame({"minClusterSize" : [mincluster], "deepsplit" : [deepsplit]})
+# parameters.to_csv("R_scripts/mgCSTs_parameters_streamlit.csv", index = False)
+
+# # Rscript called
+# process = subprocess.Popen(["Rscript", "plot.R"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+# result = process.communicate()
 
 data = mgcsts_samples[(mgcsts_samples['deepSplit'] == deepsplit) & (mgcsts_samples['minClusterSize'] == mincluster)]
 data = data.reset_index(drop = True)
 data = data.merge(projects, on = "sampleID", how = "left")
-
 
 data2 = mgCSTs_sort[(mgCSTs_sort['deepSplit'] == deepsplit) & (mgCSTs_sort['minClusterSize'] == mincluster)]
 data2 = data2.reset_index(drop = True)
@@ -59,11 +67,8 @@ with col1 :
         new_patch.append(mpatches.Patch(color = i, label = j))
 
     g.legend(handles=new_patch, title = 'Dominant taxa',loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 2)
-
-
     g.grid(False)
     st.pyplot(fig1)
-
 
 
 # Project Colors
@@ -82,26 +87,24 @@ with col2 :
     st.pyplot(fig2)
 
 st.subheader("Most abund species per mgCSTs")
-with st.expander("See tables"):
+with st.expander("See table"):
     st.dataframe(data2[['mgCST','domTaxa','meanRelabund','color']])
 
 
-# st.subheader("Colors signification")
-# with st.expander("See colors"):
-#     col1, col2 = st.columns(2)
-#     a = int(len(data2['domTaxa'].unique())/2)
+# st.subheader("MgCSTs Heatmap")
 
-#     with col1 :
-#         i = 0
-#         for taxa in (data2['domTaxa'].unique()[:a+1]) :
-#             color_taxa = data2['color'][data2['domTaxa'] == taxa].values[0]
-#             mgCST = data2[data2['domTaxa'] == taxa]['mgCST'].values[0]
-#             color = st.color_picker(taxa, color_taxa, key=i)
-#             i+=1
+# process = subprocess.Popen(["Rscript", "/Users/amaros/Desktop/mgss2/streamlit_app/R_scripts/mgCSTs_heatmap.R"])
+# result = process.communicate()
 
-#     with col2 :
-#         i = -1
-#         for taxa in data2['domTaxa'].unique()[-a:] :
-#             color_taxa = data2['color'][data2['domTaxa'] == taxa].values[0]
-#             color = st.color_picker(taxa, color_taxa, key=i*2)
-#             i-=1
+# def displayPDF(file):
+#     # Opening file from file path
+#     with open(file, "rb") as f:
+#         base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+
+#     # Embedding PDF in HTML
+#     pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
+
+#     # Displaying File
+#     st.markdown(pdf_display, unsafe_allow_html=True)
+
+# displayPDF("/Users/amaros/Desktop/mgss2/streamlit_app/Medias/new_mgCST_heatmap_30.pdf")
