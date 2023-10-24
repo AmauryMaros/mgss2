@@ -1,13 +1,7 @@
-# mgss2
+# Mgss2 streamlit
 
-## Create a conda env
+Require Python and R.
 
-conda create --name myenv python=3.8
-
-conda activate myenv
-
-conda install -n myenv --file requirements.txt
-
-## Run
+pip install -r requirements.txt
 
 streamlit run streamlit-app.py
