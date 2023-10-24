@@ -1,4 +1,4 @@
-from st_pages import Page, show_pages, Section
+from st_pages import Page, show_pages
 import streamlit as st
 
 
