@@ -35,10 +35,9 @@ count_sample = []
 for element in data2['dtc'].values :
     count_sample.append(data.groupby(['dtc']).count()['sampleID'][element])
 data2['count_sample'] = count_sample
-
+st.container()
 st.subheader("Clustering parameters")
 col1, col2 = st.columns(2)
-
 with col1 :
     g = sns.barplot(x = 'mgCST', y = 'count_sample', data = data2 , legend = True, hue = 'mgCST', palette=list(data2['color_mgCST']))
     fig1 = g.figure

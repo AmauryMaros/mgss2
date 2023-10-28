@@ -31,13 +31,13 @@ def read_pickle(path):
         df = pickle.load(file)
     return df
 metabolomics = read_pickle("/Users/amaros/Desktop/mgss2/log_norm.pkl")
-pca_model =  read_pickle("Data/pca_models.pkl")
+pca_model =  read_pickle("Data/pca_model.pkl")
 
 @st.cache_data
 def pca_model_2_compo_load(minclustersize, deepsplit):
-    return pca_model[minclustersize][deepsplit][0][0]
-principal_components = pca_model_2_compo_load(minclustersize, deepsplit)['data']
-explained_variance = pca_model_2_compo_load(minclustersize, deepsplit)['explained_variance_ratio']
+    return pca_model[minclustersize][deepsplit][0]
+principal_components = pca_model_2_compo_load(minclustersize, deepsplit)['principal_components']
+explained_variance = pca_model_2_compo_load(minclustersize, deepsplit)['explained_var_ration']
 sampleID  = pca_model_2_compo_load(minclustersize, deepsplit)['sampleID']
 mgCST = pca_model_2_compo_load(minclustersize, deepsplit)['mgCST']
 
