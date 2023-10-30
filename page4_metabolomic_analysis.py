@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
 from sklearn.decomposition import PCA
-from page3_mgCST_clustering import data2
 
 @st.cache_data
 def read_csv(url):
@@ -32,7 +31,7 @@ def read_pickle(path):
     with open(path, 'rb') as file:
         df = pickle.load(file)
     return df
-metabolomics = read_pickle("/Users/amaros/Desktop/mgss2/log_norm.pkl")
+metabolomics = read_pickle("/Users/amaros/Desktop/mgss2/log_norm.pkl")      # change this path
 pca_model =  read_pickle("Data/pca_model.pkl")
 
 @st.cache_data
