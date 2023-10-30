@@ -47,11 +47,8 @@ def filter_df(df, minclustersize, deepsplit):
 mgcsts_samples = filter_df(mgcsts_samples_df, minclustersize, deepsplit)
 color_mgCST = filter_df(color_mgCST, minclustersize, deepsplit)
 
-
-
 # Assign mgCST color for each sample
 color_mgCST = color_mgCST[['mgCST', 'color_mgCST']].reset_index(drop = True)
-color_mgCST = color_mgCST[color_mgCST['mgCST'].isin(mgCST)]
 
 st.subheader("PCA analysis - all samples")
 # Plot the figure
@@ -86,8 +83,6 @@ st.write('Minclustersize :', minclustersize)
 st.write('Deepsplit : ', deepsplit)
 
 
-
-
 # # Comparison of 2 groups
 st.subheader("Comparison between 2 groups")
 
@@ -95,11 +90,9 @@ st.container()
 # PCA comparison between 2 different mgCST - same figure
 col1, col2 = st.columns(2)
 with col1 :
-    # mgCST1 = st.slider("GroupA", 1, color_mgCST.shape[0],(1,color_mgCST.shape[0]), key='mgCST1')
-    mgCST1 = st.slider("GroupA", 1, 41,(1,41), key='mgCST1')
+    mgCST1 = st.slider("GroupA", 1, color_mgCST.shape[0],(1,color_mgCST.shape[0]), key='mgCST1')
 with col2 :
-    # mgCST2 = st.slider("GroupB", 1,color_mgCST.shape[0],(1,color_mgCST.shape[0]), key='mgCST2')
-    mgCST2 = st.slider("GroupB", 1, 41,(1,41), key='mgCST2')
+    mgCST2 = st.slider("GroupB", 1,color_mgCST.shape[0],(1,color_mgCST.shape[0]), key='mgCST2')
 
 # st.container()
 @st.cache_data
@@ -110,31 +103,30 @@ def data_pca(m1,m2):
     df2.loc[:,'label'] = "GroupB"
     df = pd.concat([df1,df2], axis = 0)
     data1 = pd.merge(df, metabolomics, on = "sampleID", how = "inner")
-    return data1
+    mgCSTs = data1['mgCST']
+    data1 = data1.drop(['dtc','domTaxa','relabund','minClusterSize','deepSplit', 'sampleID', 'mgCST', 'label'], axis = 1)
+    return data1, mgCSTs
 
-data1 = data_pca(mgCST1, mgCST2)
+data1, mgCSTs = data_pca(mgCST1, mgCST2)
 
-
-mgCSTs = data1['mgCST']
-data1 = data1.drop(['dtc','domTaxa','relabund','minClusterSize','deepSplit', 'sampleID', 'mgCST', 'label'], axis = 1)
-new_colors = color_mgCST[color_mgCST['mgCST'].isin(mgCSTs)]
-
-
-run_pca = st.button('Run PCA', key='run_pca')
-
-if run_pca :
-    # Create and fit your PCA models
+@st.cache_data
+def pca_group(data):
     pca = PCA(n_components=3)
-    principal_components = pca.fit_transform(data1)
+    df = pd.DataFrame(data = pca.fit_transform(data), columns = ['PC1','PC2','PC3'])
     explained_variance = pca.explained_variance_ratio_
+    return df, explained_variance
+pca = pca_group(data_pca(mgCST1, mgCST2)[0])
 
-    pca_df = pd.DataFrame(data = principal_components, columns=['PC1', 'PC2', 'PC3'])
-    new_legend = new_colors['color_mgCST'].apply(lambda x : mcolors.to_rgba(x)).values
+new_colors = color_mgCST[color_mgCST['mgCST'].isin(mgCSTs)]
+new_legend = new_colors['color_mgCST'].apply(lambda x : mcolors.to_rgba(x)).values
 
-    @st.cache_data
-    def display_pca(df, pc0, pc1, a ,b):
+tab1, tab2 = st.tabs(['PC1 PC2', 'PC2 PC3'])
+
+      
+@st.cache_data
+def display_pca(df, pc0, pc1, explained_variance, a ,b):
         fig,f = plt.subplots()
-        f = sns.scatterplot(x=df[pc0], y=df[pc1], hue=mgCSTs, palette=list(new_legend))
+        f = sns.scatterplot(x=df[pc0], y=df[pc1], hue=mgCST, palette=list(new_legend))
         plt.xlabel(pc0 + ' : ' + str(round(explained_variance[a]*100,2)) + "%")
         plt.ylabel(pc1 + ' : ' + str(round(explained_variance[b]*100,2)) + "%")
         new_patch = []
@@ -142,11 +134,15 @@ if run_pca :
             new_patch.append(mpatches.Patch(color = i, label = j))
         f.legend(handles=new_patch, title = 'mgCSTs',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 2)
         return fig
-    
-    tab1, tab2 = st.tabs(['PC1 PC2', 'PC2 PC3'])
-    with tab1 :    
-        st.pyplot(display_pca(pca_df, 'PC1', 'PC2', 0, 1))
-    with tab2 :
-        st.pyplot(display_pca(pca_df, 'PC2', 'PC3', 1, 2))
+
+with tab1 :
+    run_pca12 = st.button('Run PC1 PC2', key='pc12')
+    if run_pca12 :
+        st.pyplot(display_pca(pca[0], 'PC1', 'PC2',pca[1], 0, 1))
+
+with tab2 :
+    run_pca23 = st.button('Run PC2 PC3', key='pc23')
+    if run_pca23:        
+        st.pyplot(display_pca(pca[0], 'PC2', 'PC3', pca[1], 1, 2))
 
 
