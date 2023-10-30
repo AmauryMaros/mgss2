@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
 from sklearn.decomposition import PCA
-
+from page3_mgCST_clustering import data2
 
 @st.cache_data
 def read_csv(url):
@@ -14,6 +14,8 @@ def read_csv(url):
 color_mgCST = read_csv("Data/mgCST_sort_color.csv")
 mgcsts_samples_df = read_csv("Data/mgCSTs.samples.df.csv")
 project = read_csv("Data/VIRGO2_projects.csv")
+mgCSTs_sort = read_csv("Data/mgCST_sort_color.csv")
+data = read_csv("Data/mgCST_samples_color.csv")
 
 # Slider for parameters variation
 st.sidebar.subheader("Parameters")
@@ -46,8 +48,14 @@ def filter_df(df, minclustersize, deepsplit):
      return df[(df['minClusterSize'] == minclustersize) & (df['deepSplit'] == deepsplit)]
 mgcsts_samples = filter_df(mgcsts_samples_df, minclustersize, deepsplit)
 color_mgCST = filter_df(color_mgCST, minclustersize, deepsplit)
+data = mgcsts_samples[(mgcsts_samples['deepSplit'] == deepsplit) & (mgcsts_samples['minClusterSize'] == minclustersize)]
+data2 = mgCSTs_sort[(mgCSTs_sort['deepSplit'] == deepsplit) & (mgCSTs_sort['minClusterSize'] == minclustersize)]
 
-
+data2 = data2.reset_index(drop = True)
+count_sample = []
+for element in data2['dtc'].values :
+    count_sample.append(data.groupby(['dtc']).count()['sampleID'][element])
+data2['count_sample'] = count_sample
 
 # Assign mgCST color for each sample
 color_mgCST = color_mgCST[['mgCST', 'color_mgCST']].reset_index(drop = True)
@@ -59,7 +67,7 @@ col1, col2 = st.columns(2)
 pca_df = pd.DataFrame(data=principal_components, columns=['PC1', 'PC2'])
 new_legend = color_mgCST['color_mgCST'].apply(lambda x : mcolors.to_rgba(x)).values
 proj = pd.merge(sampleID, project, on='sampleID', how='inner')['Project']
-
+st.container()
 with col1 :
     fig,f = plt.subplots()
     f = sns.scatterplot(pca_df, x='PC1', y='PC2', hue=mgCST, palette=new_legend)
@@ -81,7 +89,10 @@ with  col2 :
     st.pyplot(fig)
 
 st.container()
-st.dataframe(pd.DataFrame(mgCST.value_counts().sort_index().rename(index = "Number of samples")).transpose())
+st.write("Metabolome Data : 1280 samples")
+st.dataframe(pd.DataFrame(mgCST.value_counts().sort_index().rename(index = "count_sample")).transpose())
+st.write("All samples : 2528")
+st.dataframe(data2[['mgCST','count_sample']].set_index('mgCST').transpose())
 st.write('Minclustersize :', minclustersize)
 st.write('Deepsplit : ', deepsplit)
 

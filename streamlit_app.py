@@ -4,10 +4,10 @@ import streamlit as st
 
 show_pages(
     [
-        Page("1_clustering.py", "MgSs clustering"),
-        Page("2_mgss.py", "MgSS Analysis"),
-        Page("3_mgCST_clustering.py", "MgCSTs Analysis"),
-        Page("4_metabolomic_analysis.py", "Metabolomic Analysis")
+        Page("page1_mgss_clustering.py", "MgSs clustering"),
+        Page("page2_mgss_analysis.py", "MgSS Analysis"),
+        Page("page3_mgCST_clustering.py", "MgCSTs Analysis"),
+        Page("page4_metabolomic_analysis.py", "Metabolomic Analysis")
 
     ] 
 )

@@ -16,19 +16,21 @@ mgCSTs_sort = pd.read_csv("Data/mgCST_sort_color.csv")
 projects = pd.read_csv("Data/VIRGO2_projects.csv")
 
 
+# Slider for parameters variation
 st.sidebar.subheader("Parameters")
-deepsplit = st.sidebar.slider(label="deepSplit", min_value=0, max_value=4)
-mincluster = st.sidebar.slider(label="minClusterSize", min_value=10, max_value=50)
-
-# Save parameters into a csv file for the execution of Rscript to built the heatmap
-parameters = pd.DataFrame({"minClusterSize" : [mincluster], "deepsplit" : [deepsplit]})
+parameters = pd.read_csv("R_scripts/mgCSTs_parameters_streamlit.csv")
+value_ds = parameters['deepsplit'].values[0]
+value_mcs = parameters['minClusterSize'].values[0]
+deepsplit = st.sidebar.slider(label="deepSplit", min_value=0, max_value=4, value = value_ds)
+minclustersize = st.sidebar.slider(label="minClusterSize", min_value=10, max_value=50, value = value_mcs)
+parameters = pd.DataFrame({"minClusterSize" : [minclustersize], "deepsplit" : [deepsplit]})
 parameters.to_csv("R_scripts/mgCSTs_parameters_streamlit.csv", index = False)
 
-data = mgcsts_samples[(mgcsts_samples['deepSplit'] == deepsplit) & (mgcsts_samples['minClusterSize'] == mincluster)]
+data = mgcsts_samples[(mgcsts_samples['deepSplit'] == deepsplit) & (mgcsts_samples['minClusterSize'] == minclustersize)]
 data = data.reset_index(drop = True)
 data = data.merge(projects, on = "sampleID", how = "left")
 
-data2 = mgCSTs_sort[(mgCSTs_sort['deepSplit'] == deepsplit) & (mgCSTs_sort['minClusterSize'] == mincluster)]
+data2 = mgCSTs_sort[(mgCSTs_sort['deepSplit'] == deepsplit) & (mgCSTs_sort['minClusterSize'] == minclustersize)]
 data2 = data2.reset_index(drop = True)
 
 count_sample = []
