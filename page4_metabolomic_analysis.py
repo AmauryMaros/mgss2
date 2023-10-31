@@ -126,11 +126,14 @@ data1 = data_pca(mgCST1, mgCST2)
 
 
 mgCSTs = data1['mgCST']
+groups = data1['label']
 data1 = data1.drop(['dtc','domTaxa','relabund','minClusterSize','deepSplit', 'sampleID', 'mgCST', 'label'], axis = 1)
 new_colors = color_mgCST[color_mgCST['mgCST'].isin(mgCSTs)]
 
 
 run_pca = st.button('Run PCA', key='run_pca')
+
+import matplotlib.lines as mlines
 
 if run_pca :
     # Create and fit your PCA models
@@ -144,13 +147,15 @@ if run_pca :
     @st.cache_data
     def display_pca(df, pc0, pc1, a ,b):
         fig,f = plt.subplots()
-        f = sns.scatterplot(x=df[pc0], y=df[pc1], hue=mgCSTs, palette=list(new_legend))
+        f = sns.scatterplot(x=df[pc0], y=df[pc1], hue=mgCSTs, palette=list(new_legend), style=groups, edgecolor="black")
+
         plt.xlabel(pc0 + ' : ' + str(round(explained_variance[a]*100,2)) + "%")
         plt.ylabel(pc1 + ' : ' + str(round(explained_variance[b]*100,2)) + "%")
-        new_patch = []
-        for i,j in zip(new_legend, new_colors['mgCST'].values) :
-            new_patch.append(mpatches.Patch(color = i, label = j))
-        f.legend(handles=new_patch, title = 'mgCSTs',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 2)
+        plt.legend(loc='center', bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 1)
+        # new_patch = []
+        # for i,j in zip(new_legend, new_colors['mgCST'].values) :
+        #     new_patch.append(mpatches.Patch(color = i, label = j))
+        # f.legend(handles=new_patch, title = 'mgCSTs',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 2)
         return fig
     
     tab1, tab2 = st.tabs(['PC1 PC2', 'PC2 PC3'])
@@ -160,3 +165,5 @@ if run_pca :
         st.pyplot(display_pca(pca_df, 'PC2', 'PC3', 1, 2))
 
 
+
+plt.show()

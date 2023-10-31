@@ -104,10 +104,11 @@ def data_pca(m1,m2):
     df = pd.concat([df1,df2], axis = 0)
     data1 = pd.merge(df, metabolomics, on = "sampleID", how = "inner")
     mgCSTs = data1['mgCST']
+    label = data1['mgCST']
     data1 = data1.drop(['dtc','domTaxa','relabund','minClusterSize','deepSplit', 'sampleID', 'mgCST', 'label'], axis = 1)
-    return data1, mgCSTs
+    return data1, mgCSTs, label
 
-data1, mgCSTs = data_pca(mgCST1, mgCST2)
+data1, mgCSTs, groups = data_pca(mgCST1, mgCST2)
 
 @st.cache_data
 def pca_group(data):
@@ -122,17 +123,19 @@ new_legend = new_colors['color_mgCST'].apply(lambda x : mcolors.to_rgba(x)).valu
 
 tab1, tab2 = st.tabs(['PC1 PC2', 'PC2 PC3'])
 
+
       
 @st.cache_data
 def display_pca(df, pc0, pc1, explained_variance, a ,b):
         fig,f = plt.subplots()
-        f = sns.scatterplot(x=df[pc0], y=df[pc1], hue=mgCST, palette=list(new_legend))
+        f = sns.scatterplot(x=df[pc0], y=df[pc1], hue=mgCSTs, palette=list(new_legend), style = groups)
         plt.xlabel(pc0 + ' : ' + str(round(explained_variance[a]*100,2)) + "%")
         plt.ylabel(pc1 + ' : ' + str(round(explained_variance[b]*100,2)) + "%")
-        new_patch = []
-        for i,j in zip(new_legend, new_colors['mgCST'].values) :
-            new_patch.append(mpatches.Patch(color = i, label = j))
-        f.legend(handles=new_patch, title = 'mgCSTs',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 2)
+        plt.legend(loc='best')
+        # new_patch = []
+        # for i,j in zip(new_legend, new_colors['mgCST'].values) :
+        #     new_patch.append(mpatches.Patch(color = i, label = j))
+        # f.legend(handles=new_patch, title = 'mgCSTs',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 2)
         return fig
 
 with tab1 :
