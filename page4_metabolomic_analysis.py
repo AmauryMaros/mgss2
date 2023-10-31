@@ -127,7 +127,7 @@ data1 = data_pca(mgCST1, mgCST2)
 
 mgCSTs = data1['mgCST']
 groups = data1['label']
-data1 = data1.drop(['dtc','domTaxa','relabund','minClusterSize','deepSplit', 'sampleID', 'mgCST', 'label'], axis = 1)
+data1 = data1.drop(['dtc','domTaxa','relabund','minClusterSize','deepSplit', 'sampleID', 'mgCST', 'label', 'markers'], axis = 1)
 new_colors = color_mgCST[color_mgCST['mgCST'].isin(mgCSTs)]
 
 
@@ -137,20 +137,28 @@ import matplotlib.lines as mlines
 
 if run_pca :
     # Create and fit your PCA models
-    pca = PCA(n_components=3)
+    pca = PCA(n_components=6)
     principal_components = pca.fit_transform(data1)
     explained_variance = pca.explained_variance_ratio_
+    components_compo = pca.components_
 
-    pca_df = pd.DataFrame(data = principal_components, columns=['PC1', 'PC2', 'PC3'])
+    pca_df = pd.DataFrame(data = principal_components, columns=['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6'])
     new_legend = new_colors['color_mgCST'].apply(lambda x : mcolors.to_rgba(x)).values
+    
 
     @st.cache_data
     def display_pca(df, pc0, pc1, a ,b):
         fig,f = plt.subplots()
-        f = sns.scatterplot(x=df[pc0], y=df[pc1], hue=mgCSTs, palette=list(new_legend), style=groups, edgecolor="black")
-
+        f = sns.scatterplot(x=df[pc0], y=df[pc1], hue=mgCSTs, palette=list(new_legend), style=mgCSTs, edgecolor="black")
+        # ax.scatter(x=df[pc0], y=df[pc1], c=mgCSTs.values, cmap=new_legend, markers = ['s','o'], edgecolor="black")
         plt.xlabel(pc0 + ' : ' + str(round(explained_variance[a]*100,2)) + "%")
         plt.ylabel(pc1 + ' : ' + str(round(explained_variance[b]*100,2)) + "%")
+
+        # fig, ax = plt.subplots()
+        # for i, row in df.iterrows():
+        #     ax.scatter(row[pc0], row[pc1], color=row['color'], marker=row['markers'], edgecolor='black')
+        # ax.legend()
+
         plt.legend(loc='center', bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 1)
         # new_patch = []
         # for i,j in zip(new_legend, new_colors['mgCST'].values) :
@@ -158,12 +166,15 @@ if run_pca :
         # f.legend(handles=new_patch, title = 'mgCSTs',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 2)
         return fig
     
-    tab1, tab2 = st.tabs(['PC1 PC2', 'PC2 PC3'])
+    tab1, tab2, tab3 = st.tabs(['PC1 PC2', 'PC3 PC4', 'PC5 PC6'])
     with tab1 :    
         st.pyplot(display_pca(pca_df, 'PC1', 'PC2', 0, 1))
     with tab2 :
-        st.pyplot(display_pca(pca_df, 'PC2', 'PC3', 1, 2))
+        st.pyplot(display_pca(pca_df, 'PC3', 'PC4', 2, 3))
+    with tab3 :
+        st.pyplot(display_pca(pca_df, 'PC5', 'PC6', 4, 5))
+
+    st.container()
+    compo1, compo2, compo3, compo4, compo5, compo6 = components_compo[0],components_compo[1],components_compo[3],components_compo[4],components_compo[5],components_compo[6]
 
 
-
-plt.show()
