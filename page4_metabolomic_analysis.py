@@ -31,15 +31,16 @@ def read_pickle(path):
         df = pickle.load(file)
     return df
 metabolomics = read_pickle("/Users/amaros/Desktop/mgss2/log_norm.pkl")      # change this path
-pca_model =  read_pickle("Data/pca_model.pkl")
+# pca_model =  read_pickle("Data/pca_model.pkl")
+pca_model = read_pickle("Python notebooks/pca_model2.pkl")
 
 @st.cache_data
-def pca_model_2_compo_load(minclustersize, deepsplit):
+def pca_model_data(minclustersize, deepsplit):
     return pca_model[minclustersize][deepsplit][0]
-principal_components = pca_model_2_compo_load(minclustersize, deepsplit)['principal_components']
-explained_variance = pca_model_2_compo_load(minclustersize, deepsplit)['explained_var_ration']
-sampleID  = pca_model_2_compo_load(minclustersize, deepsplit)['sampleID']
-mgCST = pca_model_2_compo_load(minclustersize, deepsplit)['mgCST']
+principal_components = pca_model_data(minclustersize, deepsplit)['principal_components']
+explained_variance = pca_model_data(minclustersize, deepsplit)['explained_var_ratio']
+sampleID  = pca_model_data(minclustersize, deepsplit)['sampleID']
+mgCST = pca_model_data(minclustersize, deepsplit)['mgCST']
 
 @st.cache_data
 def filter_df(df, minclustersize, deepsplit):
@@ -59,7 +60,7 @@ color_mgCST = color_mgCST[color_mgCST['mgCST'].isin(mgCST)]
 
 st.subheader("PCA analysis - all samples")
 
-pca_df = pd.DataFrame(data=principal_components, columns=['PC1', 'PC2'])
+pca_df = pd.DataFrame(data=principal_components, columns=['PC1', 'PC2', 'PC3'])
 new_legend = color_mgCST['color_mgCST'].apply(lambda x : mcolors.to_rgba(x)).values
 proj = pd.merge(sampleID, project, on='sampleID', how='inner')['Project']
 
