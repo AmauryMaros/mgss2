@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
 from sklearn.decomposition import PCA
+import numpy as np
 
 @st.cache_data
 def read_csv(url):
@@ -69,14 +70,10 @@ proj = pd.merge(sampleID, project, on='sampleID', how='inner')['Project']
 st.container()
 with col1 :
     fig,f = plt.subplots()
-    f = sns.scatterplot(pca_df, x='PC1', y='PC2', hue=mgCST, palette=new_legend)
+    f = sns.scatterplot(pca_df, x='PC1', y='PC2', hue=mgCST, palette=new_legend, edgecolor = 'black')
     plt.xlabel('PC1 : ' + str(round(explained_variance[0]*100,2)) + "%")
     plt.ylabel('PC2 : ' + str(round(explained_variance[1]*100,2)) + "%")
-    new_legend = color_mgCST['color_mgCST'].apply(lambda x : mcolors.to_rgba(x)).values
-    new_patch = []
-    for i,j in zip(new_legend, color_mgCST['mgCST'].values) :
-        new_patch.append(mpatches.Patch(color = i, label = j))
-    f.legend(handles=new_patch, title = 'mgCSTs',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 2)
+    plt.legend(title = 'mgCSTs',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 2)
     st.pyplot(fig)
 
 with  col2 :   
@@ -96,8 +93,6 @@ st.write('Minclustersize :', minclustersize)
 st.write('Deepsplit : ', deepsplit)
 
 
-
-
 # # Comparison of 2 groups
 st.subheader("Comparison between 2 groups")
 
@@ -105,10 +100,8 @@ st.container()
 # PCA comparison between 2 different mgCST - same figure
 col1, col2 = st.columns(2)
 with col1 :
-    # mgCST1 = st.slider("GroupA", 1, color_mgCST.shape[0],(1,color_mgCST.shape[0]), key='mgCST1')
     mgCST1 = st.slider("GroupA", 1, 41,(1,41), key='mgCST1')
 with col2 :
-    # mgCST2 = st.slider("GroupB", 1,color_mgCST.shape[0],(1,color_mgCST.shape[0]), key='mgCST2')
     mgCST2 = st.slider("GroupB", 1, 41,(1,41), key='mgCST2')
 
 # st.container()
@@ -150,21 +143,18 @@ if run_pca :
     def display_pca(df, pc0, pc1, a ,b):
         fig,f = plt.subplots()
         f = sns.scatterplot(x=df[pc0], y=df[pc1], hue=mgCSTs, palette=list(new_legend), style=mgCSTs, edgecolor="black")
-        # ax.scatter(x=df[pc0], y=df[pc1], c=mgCSTs.values, cmap=new_legend, markers = ['s','o'], edgecolor="black")
         plt.xlabel(pc0 + ' : ' + str(round(explained_variance[a]*100,2)) + "%")
         plt.ylabel(pc1 + ' : ' + str(round(explained_variance[b]*100,2)) + "%")
-
-        # fig, ax = plt.subplots()
-        # for i, row in df.iterrows():
-        #     ax.scatter(row[pc0], row[pc1], color=row['color'], marker=row['markers'], edgecolor='black')
-        # ax.legend()
-
         plt.legend(loc='center', bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 1)
-        # new_patch = []
-        # for i,j in zip(new_legend, new_colors['mgCST'].values) :
-        #     new_patch.append(mpatches.Patch(color = i, label = j))
-        # f.legend(handles=new_patch, title = 'mgCSTs',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 2)
         return fig
+    
+    @st.cache_data
+    def top_features(pc, n):
+        sorted_feature_indices = np.argsort(abs(pc))[::-1]
+        top = n
+        top_indices = sorted_feature_indices[:top]
+        top_features = [abs(pc[i]) for i in top_indices]
+        return top_features, top_indices
     
     tab1, tab2, tab3 = st.tabs(['PC1 PC2', 'PC3 PC4', 'PC5 PC6'])
     with tab1 :    
@@ -175,6 +165,8 @@ if run_pca :
         st.pyplot(display_pca(pca_df, 'PC5', 'PC6', 4, 5))
 
     st.container()
-    compo1, compo2, compo3, compo4, compo5, compo6 = components_compo[0],components_compo[1],components_compo[3],components_compo[4],components_compo[5],components_compo[6]
-
-
+    top_features_all_PC = [metabolomics.columns[top_features(components_compo[i],5)[1]] for i in [0,1,2,3,4,5]]
+    st.dataframe(
+        {k:v for k,v in zip(['PC1','PC2','PC3','PC4','PC5','PC6'], top_features_all_PC)}
+    )
+    st.caption("Top 5  contributing features in each principal component")
