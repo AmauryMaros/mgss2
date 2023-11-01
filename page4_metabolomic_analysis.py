@@ -31,8 +31,7 @@ def read_pickle(path):
         df = pickle.load(file)
     return df
 metabolomics = read_pickle("/Users/amaros/Desktop/mgss2/log_norm.pkl")      # change this path
-# pca_model =  read_pickle("Data/pca_model.pkl")
-pca_model = read_pickle("Python notebooks/pca_model2.pkl")
+pca_model =  read_pickle("Data/pca_model.pkl")
 
 @st.cache_data
 def pca_model_data(minclustersize, deepsplit):
