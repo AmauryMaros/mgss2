@@ -2,70 +2,61 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
-import matplotlib.patches as mpatches
-import matplotlib.colors as mcolors
 import subprocess
 import base64  
 
 # sns.set_theme(style="whitegrid", palette="cubehelix")
 
 subspecies_with_colors = pd.read_csv("Data/subspecies_with_colors.csv")
-mgcsts_samples = pd.read_csv("Data/mgCST_samples_color.csv")
+mgcsts_samples_df = pd.read_csv("Data/mgCSTs.samples.df.csv")
 mgCSTs_sort = pd.read_csv("Data/mgCST_sort_color.csv")
 projects = pd.read_csv("Data/VIRGO2_projects.csv")
 
 
 # Slider for parameters variation
 st.sidebar.subheader("Parameters")
-parameters = pd.read_csv("R_scripts/mgCSTs_parameters_streamlit.csv")
+parameters = pd.read_csv("Data/mgCSTs_parameters_streamlit.csv")
 value_ds = parameters['deepsplit'].values[0]
 value_mcs = parameters['minClusterSize'].values[0]
 deepsplit = st.sidebar.slider(label="deepSplit", min_value=0, max_value=4, value = value_ds)
 minclustersize = st.sidebar.slider(label="minClusterSize", min_value=10, max_value=50, value = value_mcs)
 parameters = pd.DataFrame({"minClusterSize" : [minclustersize], "deepsplit" : [deepsplit]})
-parameters.to_csv("R_scripts/mgCSTs_parameters_streamlit.csv", index = False)
+parameters.to_csv("Data/mgCSTs_parameters_streamlit.csv", index = False)
 
-data = mgcsts_samples[(mgcsts_samples['deepSplit'] == deepsplit) & (mgcsts_samples['minClusterSize'] == minclustersize)]
-data = data.reset_index(drop = True)
-data = data.merge(projects, on = "sampleID", how = "left")
+mgcsts_samples = mgcsts_samples_df[(mgcsts_samples_df['deepSplit'] == deepsplit) & (mgcsts_samples_df['minClusterSize'] == minclustersize)]
+mgcsts_samples = mgcsts_samples.reset_index(drop = True)
+mgcsts_samples = mgcsts_samples.merge(projects, on = "sampleID", how = "left")
 
-data2 = mgCSTs_sort[(mgCSTs_sort['deepSplit'] == deepsplit) & (mgCSTs_sort['minClusterSize'] == minclustersize)]
-data2 = data2.reset_index(drop = True)
+mgcsts = mgCSTs_sort[(mgCSTs_sort['deepSplit'] == deepsplit) & (mgCSTs_sort['minClusterSize'] == minclustersize)]
+mgcsts = mgcsts.reset_index(drop = True)
 
 count_sample = []
-for element in data2['dtc'].values :
-    count_sample.append(data.groupby(['dtc']).count()['sampleID'][element])
-data2['count_sample'] = count_sample
+for element in mgcsts['dtc'].values :
+    count_sample.append(mgcsts_samples.groupby(['dtc']).count()['sampleID'][element])
+mgcsts['count_sample'] = count_sample
+
 st.container()
 st.subheader("Clustering parameters")
-col1, col2 = st.columns(2)
+
+col1, col2, col3 = st.columns(3)
 with col1 :
-    g = sns.barplot(x = 'mgCST', y = 'count_sample', data = data2 , legend = True, hue = 'mgCST', palette=list(data2['color_mgCST']))
-    fig1 = g.figure
-    plt.xlabel("mgCSTs")
+    fig1,g = plt.subplots()
+    g = sns.barplot(x = 'mgCST', y = 'count_sample', data = mgcsts , legend = True, hue = 'mgCST', palette=list(mgcsts['color_mgCST']),edgecolor='black', linewidth=0.5)
+    plt.xlabel("mgCST")
     plt.ylabel("Number of samples")
-    g.tick_params(axis='x', which='major', labelsize= 8, labelrotation=70)
-    # g.legend(title = "Dominant Taxa", loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 2)
-    new_legend = data2['color_mgCST'].apply(lambda x : mcolors.to_rgba(x)).values
-
-    new_patch = []
-    for i,j in zip(new_legend, data2['domTaxa'].values) :
-        new_patch.append(mpatches.Patch(color = i, label = j))
-
-    g.legend(handles=new_patch, title = 'Dominant taxa',loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 2)
+    plt.tick_params(axis='x', which='major', labelsize= 8, labelrotation=70)
+    g.legend(title = "mgCSTs", loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 5)
     g.grid(False)
     st.pyplot(fig1)
 
-
-# Project Colors
-proj_cols = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#d1ba36', '#a65628', '#f781bf', '#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e']
-df2 = data.groupby(["Project", "mgCST"]).size().reset_index().pivot(columns='Project', index = 'mgCST', values =0)
-
 with col2 :
-    h = df2.plot(kind='bar', stacked=True, color=proj_cols)
+    # Project Colors
+    proj_cols = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#d1ba36', '#a65628', '#f781bf', '#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e']
+    df2 = mgcsts_samples.groupby(["Project", "mgCST"]).size().reset_index().pivot(columns='Project', index = 'mgCST', values =0)
+    # Plot the figure
+    h = df2.plot(kind='bar', stacked=True, color=proj_cols, edgecolor='black', linewidth=0.5)
     fig2 = h.figure
-    plt.xlabel("mgCSTs")
+    plt.xlabel("mgCST")
     plt.ylabel("Number of samples")
     h.legend(title = "Project",loc='upper right', fontsize="small")
     h.tick_params(axis='x', which='major', labelsize= 8, labelrotation=70)
@@ -73,9 +64,31 @@ with col2 :
     h.grid(False)
     st.pyplot(fig2)
 
+with col3 :
+    File_S6 = pd.read_excel('Data/File_S6_clean.xlsx')
+    old_mgCST = File_S6[['mapID', 'mgCST']]
+    old_mgCST = old_mgCST.rename(columns={'mapID':'sampleID'})
+    new_mgCST = mgcsts_samples[(mgcsts_samples['deepSplit'] == deepsplit) & (mgcsts_samples['minClusterSize'] == minclustersize)][['sampleID', 'mgCST']]
+    new_vs_old = pd.merge(new_mgCST, old_mgCST, on='sampleID', how='inner')
+    bubble_data = new_vs_old.groupby(['mgCST_x', 'mgCST_y']).size().reset_index(name='count')
+    bubble_data = bubble_data.rename(columns={"mgCST_x":"mgCST", "mgCST_y":"old_mgCST"})
+
+    bubble_color = []
+    for i in sorted(bubble_data['mgCST'].unique()):
+        bubble_color.append(mgcsts[mgcsts['mgCST'] == i]['color_mgCST'].values[0])
+        
+    # Plot the figure
+    fig3, f = plt.subplots()
+    f = sns.scatterplot(data=bubble_data, x = 'mgCST', y = 'old_mgCST', hue='mgCST', size='count', edgecolor='black', palette=list(bubble_color))
+    plt.xlabel("mgCST")
+    plt.ylabel("old_mgCST")
+    plt.grid(True)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 5)
+    st.pyplot(fig3)
+
 st.subheader("Most abund species per mgCSTs")
 with st.expander("See table"):
-    st.dataframe(data2[['mgCST','domTaxa','meanRelabund','color_mgCST']])
+    st.dataframe(mgcsts[['mgCST','domTaxa','meanRelabund','color_mgCST']])
 
 heatmap = st.button(label = "Generate heatmap (1min30)")
 if heatmap :

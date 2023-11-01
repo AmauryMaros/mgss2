@@ -12,7 +12,7 @@ subspecies.with.colors <- read_csv("Data/subspecies_with_colors.csv")
 subspecies.with.colors$Subspecies <- gsub("\\.", "_", subspecies.with.colors$Subspecies)
 
 # Define the conditions
-parameters <- read.csv("R_scripts/mgCSTs_parameters_streamlit.csv")
+parameters <- read.csv("Data/mgCSTs_parameters_streamlit.csv")
 deepsplit <- parameters$deepsplit
 mincluster <- parameters$minClusterSize
 
