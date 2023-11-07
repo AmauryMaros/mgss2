@@ -145,12 +145,19 @@ if run_pca :
         return fig
     
     @st.cache_data
-    def top_features(pc, n):
-        sorted_feature_indices = np.argsort(abs(pc))[::-1]
-        top = n
-        top_indices = sorted_feature_indices[:top]
-        top_features = [abs(pc[i]) for i in top_indices]
-        return top_features, top_indices
+    def top_features(pc):
+        # sorted_feature_indices = np.argsort(abs(pc))[::-1]
+        # top = n
+        # top_indices = sorted_feature_indices[:top]
+        # top_features = [abs(pc[i]) for i in top_indices]
+        # return top_features, top_indices
+    
+        top_features = []
+        for i in range(len(data1.columns)):
+            index = data1.columns[np.where(sorted(abs(pca.components_[pc]),reverse=True)[i] == abs(pca.components_[pc]))].values[0]
+            top_features.append(index)
+
+        return top_features
     
     tab1, tab2, tab3 = st.tabs(['PC1 PC2', 'PC3 PC4', 'PC5 PC6'])
     with tab1 :    
@@ -160,9 +167,69 @@ if run_pca :
     with tab3 :
         st.pyplot(display_pca(pca_df, 'PC5', 'PC6', 4, 5))
 
-    st.container()
-    top_features_all_PC = [metabolomics.columns[top_features(components_compo[i],5)[1]] for i in [0,1,2,3,4,5]]
-    st.dataframe(
-        {k:v for k,v in zip(['PC1','PC2','PC3','PC4','PC5','PC6'], top_features_all_PC)}
-    )
-    st.caption("Top 5  contributing features in each principal component")
+    # # st.dataframe(data1)
+    # st.write('top feature pc1')
+    # st.write(top_features(0)[:5])
+    # st.write('top feature pc2')
+    # st.write(top_features(1)[:5])
+
+
+    # import plotly.graph_objects as go
+
+    # PCs = ['PC1'] * 3 + ['PC2'] * 3 + ['PC3'] * 3 + ['PC4'] * 3 + ['PC5'] * 3 + ['PC6'] * 3
+    # Variance = top_features(components_compo[0],3)[0] + top_features(components_compo[1],3)[0] + top_features(components_compo[2],3)[0] + top_features(components_compo[3],3)[0] + top_features(components_compo[4],3)[0] + top_features(components_compo[5],3)[0]
+    # Features = []
+    # for i in [0,1,2,3,4,5] :
+    #     Features.append(metabolomics.columns[top_features(components_compo[i],3)[1]].values)
+    # Features = np.concatenate(Features)
+
+    # plotly_df = pd.DataFrame({'Variance' : Variance, 'PCs':PCs, 'Features' : Features})
+    # st.dataframe(plotly_df)
+
+    # # Define colors for each 'PC' category
+    # pc_colors = {
+    #     'PC1': 'red',
+    #     'PC2': 'green',
+    #     'PC3': 'blue',
+    #     'PC4': 'purple',
+    #     'PC5': 'yellow',
+    #     'PC6': 'orange'
+    # }
+
+    # fig = go.Figure()
+
+    # for index, row in plotly_df.iterrows():
+    #     fig.add_trace(go.Bar(
+    #         x=[row['PCs']],
+    #         y=[row['Variance']],
+    #         text=[row['Features']],
+    #         name=row['PCs'],
+    #         marker=dict(color=pc_colors[row['PCs']])  # Assign color based on 'PCs'
+        # ))
+
+    # fig.update_layout(
+    #     title='Variance by PC and Feature',
+    #     xaxis_title='Features',
+    #     yaxis_title='Variance',
+    #     barmode='group'
+    # )
+    # fig.update_layout(
+    # title='Variance by PC and Feature',
+    # xaxis_title='PCs',
+    # yaxis_title='Variance',
+    # barmode='group',
+    # xaxis=dict(
+    #     tickmode='array',
+    #     tickvals=[1, 2, 3, 4, 5, 6],
+    #     ticktext=plotly_df['PCs'].unique(),
+    #     tickangle=0,
+    #     title_text='PCs',
+    # ),
+    # bargap=0.2,  # Adjust this value to decrease the gap between bars in the same group
+    # bargroupgap=0.1,  # Adjust this value to decrease the gap between groups of bars
+    # xaxis_showgrid=False,  # Hide gridlines
+    # )
+
+    # st.plotly_chart(fig, theme='streamlit', use_container_width=True)
+    # fig.show()
+
