@@ -4,3 +4,5 @@ dynamicTreeCut
 Pillow
 matplotlib
 seaborn
+plotly
+sklearn

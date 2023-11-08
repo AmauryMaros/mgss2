@@ -6,6 +6,8 @@ import pandas as pd
 import matplotlib.colors as mcolors
 from sklearn.decomposition import PCA
 import numpy as np
+import plotly.express as px
+
 
 # Slider for parameters variation
 st.sidebar.subheader("Parameters")
@@ -156,7 +158,7 @@ if run_pca :
                               'explained_variance' : [arr[i] for i in max_indices]}).sort_values(by='explained_variance', ascending=False)
         pc_df_neg = pd.DataFrame({'Features':[cols[i] for i in min_indices],
                               'explained_variance' : [arr[i] for i in min_indices]}).sort_values(by='explained_variance', ascending=True)
-        return pc_df_pos, pc_df_neg
+        return pc_df_pos.reset_index(drop=True), pc_df_neg.reset_index(drop=True)
     
     st.subheader("PCA Visualization")
     tab1, tab2, tab3 = st.tabs(['PC1 PC2', 'PC3 PC4', 'PC5 PC6'])
@@ -175,188 +177,29 @@ if run_pca :
             col1, col2 = st.columns(2)
             with col1 :
                 st.write("Top5 PC" + str(i+1) + " pos")
-                st.dataframe(top_features(i,5)[0].reset_index(drop=True))
+                st.dataframe(top_features(i,5)[0])
             with col2 :
                 st.write("Top5 PC" + str(i+1) + " neg")
-                st.dataframe(top_features(i,5)[1].reset_index(drop=True))
+                st.dataframe(top_features(i,5)[1])
 
-    # import plotly.graph_objects as go
+    n = 5
+    PCs = ['PC1'] * n + ['PC2'] * n + ['PC3'] * n + ['PC4'] * n + ['PC5'] * n + ['PC6'] * n
+    plotly_df_pos = pd.concat([top_features(0,n)[0],top_features(1,n)[0],top_features(2,n)[0],top_features(3,n)[0],top_features(4,n)[0],top_features(5,n)[0]], axis = 0)        
+    plotly_df_pos['PCs'] = PCs
+    plotly_df_pos = plotly_df_pos.reset_index(drop=True)
+    plotly_df_pos['feats_rank'] = [1,2,3,4,5]*6
+    
+    plotly_df_neg = pd.concat([top_features(0,n)[1],top_features(1,n)[1],top_features(2,n)[1],top_features(3,n)[1],top_features(4,n)[1],top_features(5,n)[1]], axis = 0)        
+    plotly_df_neg['PCs'] = PCs
+    plotly_df_neg = plotly_df_neg.reset_index(drop=True)
+    plotly_df_neg['feats_rank'] = [1,2,3,4,5]*6
 
-    # n = 5
+    df_pos = plotly_df_pos.sort_values(['feats_rank', 'PCs']).reset_index(drop=True)
+    df_pos['feats_rank'] = df_pos['feats_rank'].astype(str)
+    fig = px.bar(df_pos, x='PCs', y='explained_variance', color='feats_rank', text='Features', barmode='group', title='5 most contributing features - Positive correlation')
+    st.plotly_chart(fig, theme='streamlit', use_container_width=True)
 
-    # PCs = ['PC1'] * n + ['PC2'] * n + ['PC3'] * n + ['PC4'] * n + ['PC5'] * n + ['PC6'] * n
-
-    # plotly_df = pd.concat([top_features(0,n)[0],top_features(1,n)[0],top_features(2,n)[0],top_features(3,n)[0],top_features(4,n)[0],top_features(5,n)[0]], axis = 0)        
-    # plotly_df['PCs'] = PCs
-
-    # # Define colors for each 'PC' category
-    # pc_colors = {
-    #     'PC1': 'red',
-    #     'PC2': 'green',
-    #     'PC3': 'blue',
-    #     'PC4': 'purple',
-    #     'PC5': 'yellow',
-    #     'PC6': 'orange'
-    # }
-
-    # fig = go.Figure()
-
-    # for index, row in plotly_df.iterrows():
-    #     fig.add_trace(go.Bar(
-    #         x=[row['PCs']],
-    #         y=[row['explained_variance']],
-    #         text=[row['Features']],
-    #         name=row['PCs'],
-    #         showlegend=False,
-    #         marker=dict(
-    #             color=pc_colors[row['PCs']],
-    #             line=dict(color='black',
-    #                       width=1.5))
-    #     ))
-
-    # fig.update_layout(
-    #     title='5 most contributing features for each PCs - Positive correlation',
-    #     xaxis_title='Features',
-    #     yaxis_title='Explained Variance',
-    #     barmode='group',
-    #     bargap=0.1,
-    #     xaxis_showgrid=False
-    # )
-
-    # st.plotly_chart(fig, theme='streamlit', use_container_width=True)
-    # # fig.show()
-
-
-    # PCompo = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6']
-    # fig = go.Figure()
-    # for i in range(6):
-    #     fig.add_trace(go.Bar(
-    #             x=PCompo,
-    #             y=plotly_df[plotly_df['PCs'] == 'PC'+str(i+1)]['explained_variance'],
-    #             text=plotly_df[plotly_df['PCs'] == 'PC'+str(i+1)]['Features'],
-    #             name='PC'+str(i+1),
-    #             marker_color = pc_colors['PC'+str(i+1)]
-    #         ))
-
-    # fig.update_layout(
-    #     title='5 most contributing features for each PCs - Positive correlation',
-    #     xaxis_title='Features',
-    #     yaxis_title='Explained Variance',
-    #     barmode='group',
-    #     bargap=0.1,
-    #     xaxis_showgrid=False
-    # )
-    # st.plotly_chart(fig, theme='streamlit', use_container_width=True)
-    # # fig.show()
-
-
-
-
-    # fig = go.Figure()
-    # for i in range(6):
-
-    #     fig.add_trace(go.Bar(
-    #             x=plotly_df[plotly_df['PCs'] == 'PC'+str(i+1)]['Features'],
-    #             y=plotly_df[plotly_df['PCs'] == 'PC'+str(i+1)]['explained_variance'],
-    #             text=plotly_df[plotly_df['PCs'] == 'PC'+str(i+1)]['Features'],
-    #             name='PC'+str(i+1),
-    #             marker_color = pc_colors['PC'+str(i+1)]
-    #         ))
-
-    #     fig.update_layout(
-    #     title='5 most contributing features for each PCs - Positive correlation',
-    #     xaxis_title='Features',
-    #     yaxis_title='Explained Variance',
-    #     barmode='group',
-    #     bargap=0.005,
-    #     bargroupgap=0.005,
-    #     xaxis_showgrid=False
-    # )
-    # st.plotly_chart(fig, theme='streamlit', use_container_width=True)
-    # # fig.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # plotly_df_neg = pd.concat([top_features(0,n)[1],top_features(1,n)[1],top_features(2,n)[1],top_features(3,n)[1],top_features(4,n)[1],top_features(5,n)[1]], axis = 0)        
-    # plotly_df_neg['PCs'] = PCs
-
-    # # Define colors for each 'PC' category
-    # pc_colors = {
-    #     'PC1': 'red',
-    #     'PC2': 'green',
-    #     'PC3': 'blue',
-    #     'PC4': 'purple',
-    #     'PC5': 'yellow',
-    #     'PC6': 'orange'
-    # }
-
-    # fig = go.Figure()
-
-    # for index, row in plotly_df_neg.iterrows():
-    #     fig.add_trace(go.Bar(
-    #         x=[row['PCs']],
-    #         y=[row['explained_variance']],
-    #         text=[row['Features']],
-    #         name=row['PCs'],
-    #         showlegend=False,
-    #         marker=dict(
-    #             color=pc_colors[row['PCs']],
-    #             line=dict(color='black',
-    #                       width=1.5))
-    #     ))
-
-    # fig.update_layout(
-    #     title='5 most contributing features for each PCs - Negative correlation',
-    #     xaxis_title='Features',
-    #     yaxis_title='Explained Variance',
-    #     barmode='group',
-    #     bargap=0.1,
-    #     xaxis_showgrid=False
-    # )
-
-    # st.plotly_chart(fig, theme='streamlit', use_container_width=True)
-    # fig.show()
-
-
-    # pos_neg = pd.concat([plotly_df, plotly_df_neg], axis =0)
-    # fig = go.Figure()
-
-    # for index, row in pos_neg.iterrows():
-    #     fig.add_trace(go.Bar(
-    #         x=[row['PCs']],
-    #         y=[row['explained_variance']],
-    #         text=[row['Features']],
-    #         name=row['PCs'],
-    #         showlegend=False,
-    #         marker=dict(
-    #             color=pc_colors[row['PCs']],
-    #             line=dict(color='black',
-    #                       width=1.5))
-    #     ))
-
-    # fig.update_layout(
-    #     title='5 most contributing features for each PCs - Negative correlation',
-    #     xaxis_title='Features',
-    #     yaxis_title='Explained Variance',
-    #     barmode='group',
-    #     bargap=0.1,  # Adjust this value to decrease the gap between bars in the same group
-    #     # bargroupgap=0.1,  # Adjust this value to decrease the gap between groups of bars
-    #     xaxis_showgrid=False  # Hide gridlines
-    # )
-
-    # st.plotly_chart(fig, theme='streamlit', use_container_width=True)
-    # fig.show()
-
+    df_neg = plotly_df_neg.sort_values(['feats_rank', 'PCs']).reset_index(drop=True)
+    df_neg['feats_rank'] = df_neg['feats_rank'].astype(str)
+    fig = px.bar(df_neg, x='PCs', y='explained_variance', color='feats_rank', text='Features', barmode='group', title='5 most contributing features - Negative correlation')
+    st.plotly_chart(fig, theme='streamlit', use_container_width=True)
