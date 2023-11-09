@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import subprocess
 import base64  
+import plotly.express as px
 
-# sns.set_theme(style="whitegrid", palette="cubehelix")
+st.set_page_config(layout="wide")
 
 subspecies_with_colors = pd.read_csv("Data/subspecies_with_colors.csv")
 mgcsts_samples_df = pd.read_csv("Data/mgCSTs.samples.df.csv")
@@ -38,31 +39,41 @@ mgcsts['count_sample'] = count_sample
 st.container()
 st.subheader("Clustering parameters")
 
+mgcsts['mgCST'] = mgcsts['mgCST'].astype(str)
+
 col1, col2, col3 = st.columns(3)
 with col1 :
-    fig1,g = plt.subplots()
-    g = sns.barplot(x = 'mgCST', y = 'count_sample', data = mgcsts , legend = True, hue = 'mgCST', palette=list(mgcsts['color_mgCST']),edgecolor='black', linewidth=0.5)
-    plt.xlabel("mgCST")
-    plt.ylabel("Number of samples")
-    plt.tick_params(axis='x', which='major', labelsize= 8, labelrotation=70)
-    g.legend(title = "mgCSTs", loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 5)
-    g.grid(False)
-    st.pyplot(fig1)
+    # fig1,g = plt.subplots()
+    # g = sns.barplot(x = 'mgCST', y = 'count_sample', data = mgcsts , legend = True, hue = 'mgCST', palette=list(mgcsts['color_mgCST']),edgecolor='black', linewidth=0.5)
+    # plt.xlabel("mgCST")
+    # plt.ylabel("Number of samples")
+    # plt.tick_params(axis='x', which='major', labelsize= 8, labelrotation=70)
+    # g.legend(title = "mgCSTs", loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 5)
+    # g.grid(False)
+    # st.pyplot(fig1)
+    fig = px.bar(mgcsts, x='mgCST', y='count_sample', color='mgCST',color_discrete_sequence=list(mgcsts['color_mgCST']))
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2 :
     # Project Colors
     proj_cols = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#d1ba36', '#a65628', '#f781bf', '#1b9e77', '#d95f02', '#7570b3', '#e7298a', '#66a61e']
-    df2 = mgcsts_samples.groupby(["Project", "mgCST"]).size().reset_index().pivot(columns='Project', index = 'mgCST', values =0)
-    # Plot the figure
-    h = df2.plot(kind='bar', stacked=True, color=proj_cols, edgecolor='black', linewidth=0.5)
-    fig2 = h.figure
-    plt.xlabel("mgCST")
-    plt.ylabel("Number of samples")
-    h.legend(title = "Project",loc='upper right', fontsize="small")
-    h.tick_params(axis='x', which='major', labelsize= 8, labelrotation=70)
-    h.legend(title = "Project",loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 3)
-    h.grid(False)
-    st.pyplot(fig2)
+    df2 = mgcsts_samples.groupby(["Project", "mgCST"]).size().reset_index().pivot(columns='Project', index = 'mgCST', values =0).reset_index()
+    # df2 = df2.reset_index()
+    # st.dataframe(df2)
+    # st.write(df2.columns)
+    # mgcsts_samples
+#     # Plot the figure
+#     h = df2.plot(kind='bar', stacked=True, color=proj_cols, edgecolor='black', linewidth=0.5)
+#     fig2 = h.figure
+#     plt.xlabel("mgCST")
+#     plt.ylabel("Number of samples")
+#     h.legend(title = "Project",loc='upper right', fontsize="small")
+#     h.tick_params(axis='x', which='major', labelsize= 8, labelrotation=70)
+#     h.legend(title = "Project",loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 3)
+#     h.grid(False)
+#     st.pyplot(fig2)
+    fig = px.bar(df2, x='mgCST', y=df2.drop('mgCST', axis=1).columns.values)
+    st.plotly_chart(fig, use_container_width=True)
 
 with col3 :
     File_S6 = pd.read_excel('Data/File_S6_clean.xlsx')
@@ -74,17 +85,24 @@ with col3 :
     bubble_data = bubble_data.rename(columns={"mgCST_x":"mgCST", "mgCST_y":"old_mgCST"})
 
     bubble_color = []
+    mgcsts['mgCST'] = mgcsts['mgCST'].astype(int)
     for i in sorted(bubble_data['mgCST'].unique()):
         bubble_color.append(mgcsts[mgcsts['mgCST'] == i]['color_mgCST'].values[0])
         
-    # Plot the figure
-    fig3, f = plt.subplots()
-    f = sns.scatterplot(data=bubble_data, x = 'mgCST', y = 'old_mgCST', hue='mgCST', size='count', edgecolor='black', palette=list(bubble_color))
-    plt.xlabel("mgCST")
-    plt.ylabel("old_mgCST")
-    plt.grid(True)
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 5)
-    st.pyplot(fig3)
+    # # Plot the figure with seaborn
+    # fig3, f = plt.subplots()
+    # f = sns.scatterplot(data=bubble_data, x = 'mgCST', y = 'old_mgCST', hue='mgCST', size='count', edgecolor='black', palette=list(bubble_color))
+    # plt.xlabel("mgCST")
+    # plt.ylabel("old_mgCST")
+    # plt.grid(True)
+    # plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 5)
+    # st.pyplot(fig3)
+    
+
+    bubble_data['mgCST'] = bubble_data['mgCST'].astype(str)
+    fig = px.scatter(bubble_data, x='mgCST', y = 'old_mgCST', color='mgCST',color_discrete_sequence=list(bubble_color), size='count')
+    st.plotly_chart(fig, use_container_width=True)
+
 
 st.subheader("Most abund species per mgCSTs")
 with st.expander("See table"):
