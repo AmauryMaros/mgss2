@@ -5,6 +5,8 @@ import pickle
 from dynamicTreeCut import cutreeHybrid
 import seaborn as sns
 
+st.set_page_config(layout="centered")
+
 with open("Data/samples_dist.pkl", "rb") as file:
     samples_dist = pickle.load(file)
 

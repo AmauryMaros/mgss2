@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from PIL import Image
 
+st.set_page_config(layout="centered")
+
 clust = pd.read_csv("Data/mgss.clustering.parameters.csv").rename(columns={"Unnamed: 0" : "species"})
 mgss_coverage = pd.read_csv("Data/mgSs.coverage.stats.csv").rename(columns={"Unnamed: 0" : "sub_species", "as.factor(sample_cluster)" : "sample_cluster"})
 species = mgss_coverage['sub_species'].apply(lambda x : x.split(".")[0]).unique()
