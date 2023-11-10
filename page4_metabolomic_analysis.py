@@ -185,17 +185,17 @@ if run_pca :
     
     cols = metabolomics.columns
     
-    @st.cache_data
-    def top_features(pc, n) :
-        arr = pca.components_[pc]
-        n_largest = n
-        max_indices = np.argpartition(-arr, n_largest)[:n_largest]
-        min_indices = np.argpartition(arr, n_largest)[:n_largest]
-        pc_df_pos = pd.DataFrame({'Features':[cols[i] for i in max_indices],
-                              'explained_variance' : [arr[i] for i in max_indices]}).sort_values(by='explained_variance', ascending=False)
-        pc_df_neg = pd.DataFrame({'Features':[cols[i] for i in min_indices],
-                              'explained_variance' : [arr[i] for i in min_indices]}).sort_values(by='explained_variance', ascending=True)
-        return pc_df_pos.reset_index(drop=True), pc_df_neg.reset_index(drop=True)
+    # @st.cache_data
+    # def top_features(pc, n) :
+    #     arr = pca.components_[pc]
+    #     n_largest = n
+    #     max_indices = np.argpartition(-arr, n_largest)[:n_largest]
+    #     min_indices = np.argpartition(arr, n_largest)[:n_largest]
+    #     pc_df_pos = pd.DataFrame({'Features':[cols[i] for i in max_indices],
+    #                           'explained_variance' : [arr[i] for i in max_indices]}).sort_values(by='explained_variance', ascending=False)
+    #     pc_df_neg = pd.DataFrame({'Features':[cols[i] for i in min_indices],
+    #                           'explained_variance' : [arr[i] for i in min_indices]}).sort_values(by='explained_variance', ascending=True)
+    #     return pc_df_pos.reset_index(drop=True), pc_df_neg.reset_index(drop=True)
     
     st.subheader("PCA Visualization")
     # tab1, tab2, tab3 = st.tabs(['PC1 PC2', 'PC3 PC4', 'PC5 PC6'])
@@ -225,26 +225,65 @@ if run_pca :
 
     # Number of features to consider
     n = 5
-    PCs = ['PC1'] * n + ['PC2'] * n + ['PC3'] * n + ['PC4'] * n + ['PC5'] * n + ['PC6'] * n
-    plotly_df_pos = pd.concat([top_features(0,n)[0],top_features(1,n)[0],top_features(2,n)[0],top_features(3,n)[0],top_features(4,n)[0],top_features(5,n)[0]], axis = 0)        
-    plotly_df_pos['PCs'] = PCs
-    plotly_df_pos = plotly_df_pos.reset_index(drop=True)
-    plotly_df_pos['feats_rank'] = [1,2,3,4,5]*6
-    
-    plotly_df_neg = pd.concat([top_features(0,n)[1],top_features(1,n)[1],top_features(2,n)[1],top_features(3,n)[1],top_features(4,n)[1],top_features(5,n)[1]], axis = 0)        
-    plotly_df_neg['PCs'] = PCs
-    plotly_df_neg = plotly_df_neg.reset_index(drop=True)
-    plotly_df_neg['feats_rank'] = [1,2,3,4,5]*6
 
+    # Principal Components Loadings (original features composition)
+    features_names = data1.columns
+    principal_components_loadings = pd.DataFrame(pca.components_, columns=features_names)
+    
+    def get_features(pc, n) :
+
+        '''For a given principal component, this function returns the n most contributing features (positive & negative correlation) from principal_components_loadings dataset.
+        Results are stored in a dataframe with composed of feature name, explained_variance associated, principal component desired and feature rank'''
+
+        df_pos = pd.DataFrame(principal_components_loadings.iloc[pc,:].sort_values(ascending=False)[:n]).reset_index().rename(columns={'index':'Features', pc:'Explained_variance'})
+        df_pos['PCs'] = 'PC'+str(pc+1)
+        df_pos['Feature_rank'] = [i+1 for i in range(n)]
+
+        df_neg = pd.DataFrame(principal_components_loadings.iloc[pc,:].sort_values(ascending=False)[-n:]).reset_index().rename(columns={'index':'Features', pc:'Explained_variance'})
+        df_neg['PCs'] = 'PC'+str(pc+1)
+        df_neg['Feature_rank'] = sorted([i+1 for i in range(n)],reverse=True)
+
+        return df_pos, df_neg
+    
+    # Store positive & negative correlation DataFrame into a list
+    top_pos = [get_features(i, 5)[0] for i in range(6)]
+    top_neg = [get_features(i, 5)[1] for i in range(6)]
+
+    # Concatenate all element of each list one after the other (vertical axis)
+    plotly_df_pos = pd.DataFrame()
+    for i in top_pos :
+        plotly_df_pos = pd.concat([plotly_df_pos,i], axis=0)
+
+    plotly_df_neg = pd.DataFrame()
+    for i in top_neg :
+        plotly_df_neg = pd.concat([plotly_df_neg, i], axis = 0)
+
+    # Display the barplot for features loadings
     col1, col2 = st.columns(2)
     with col1 :
-        df_pos = plotly_df_pos.sort_values(['feats_rank', 'PCs']).reset_index(drop=True)
-        df_pos['feats_rank'] = df_pos['feats_rank'].astype(str)
-        fig = px.bar(df_pos, x='PCs', y='explained_variance', color='feats_rank', text='Features', barmode='group', title='5 most contributing features - Positive correlation')
+        plotly_df_pos['Feature_rank'] = plotly_df_pos['Feature_rank'].astype(str)
+
+        fig = px.bar(plotly_df_pos, x='PCs', y='Explained_variance', 
+                     color='Feature_rank', text='Features', barmode='stack',
+                     labels={'PCs':'Principal Component'}, 
+                     title='5 most contributing features - Positive correlation')
+        
         st.plotly_chart(fig, theme='streamlit', use_container_width=True)
+
     with col2 :
-        df_neg = plotly_df_neg.sort_values(['feats_rank', 'PCs']).reset_index(drop=True)
-        df_neg['feats_rank'] = df_neg['feats_rank'].astype(str)
-        fig = px.bar(df_neg, x='PCs', y='explained_variance', color='feats_rank', text='Features', barmode='group', title='5 most contributing features - Negative correlation')
+        plotly_df_neg['Feature_rank'] = plotly_df_neg['Feature_rank'].astype(str)
+
+        fig = px.bar(plotly_df_neg, x='PCs', y = 'Explained_variance', 
+                     color='Feature_rank', text='Features', barmode='stack',
+                     labels={'PCs':'Principal Component'}, 
+                     title='5 most contributing features - Negative correlation')
+        
         st.plotly_chart(fig, theme='streamlit', use_container_width=True)
+
+
+
+
+# # streamlit plotly colors
+# # ["#0068c9","#83c9ff","#ff2b2b","#ffabab","#29b09d","#7defa1","#ff8700","#ffd16a","#6d3fc0","#d5dae5"] 
+
 
