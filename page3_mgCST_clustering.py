@@ -5,6 +5,7 @@ import seaborn as sns
 import subprocess
 import base64  
 import plotly.express as px
+import numpy as np
 
 st.set_page_config(layout="wide")
 
@@ -51,7 +52,25 @@ with col1 :
     # g.legend(title = "mgCSTs", loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 5)
     # g.grid(False)
     # st.pyplot(fig1)
-    fig = px.bar(mgcsts, x='mgCST', y='count_sample', color='mgCST',color_discrete_sequence=list(mgcsts['color_mgCST']))
+    fig = px.bar(mgcsts, x='mgCST', y='count_sample', color='mgCST',
+                 color_discrete_sequence=list(mgcsts['color_mgCST']), 
+                 labels={"count_sample" : "Number of samples"},
+                 title = "Number of samples on each MgCSTs - colored by mgCST")
+    subtitle_text = f"MinClusterSize = {minclustersize} <br> DeepSplit = {deepsplit}"
+    fig.add_annotation(
+        dict(text=subtitle_text,
+            xref='paper', yref='paper',
+            x=0, y=1.05,
+            showarrow=False,
+            font=dict(size=12)
+            ))
+
+    fig.update_xaxes(tickmode='array', tickvals=mgcsts['mgCST'])
+    fig.update_layout(
+    xaxis=dict(
+        tickangle=0,  # Change the angle of the tick labels
+        tickfont=dict(size=10)  # Change the size of the tick labels
+        ))
     st.plotly_chart(fig, use_container_width=True)
 
 with col2 :
@@ -72,7 +91,23 @@ with col2 :
 #     h.legend(title = "Project",loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True, shadow=True, ncol = 3)
 #     h.grid(False)
 #     st.pyplot(fig2)
-    fig = px.bar(df2, x='mgCST', y=df2.drop('mgCST', axis=1).columns.values)
+    fig = px.bar(df2, x='mgCST', y=df2.drop('mgCST', axis=1).columns.values, labels={'value' : 'Number of samples'},
+                 title = f"Number of samples on each MgCSTs - colored by projects")
+    subtitle_text = f"MinClusterSize = {minclustersize} <br> DeepSplit = {deepsplit}"
+    fig.add_annotation(
+        dict(text=subtitle_text,
+            xref='paper', yref='paper',
+            x=0, y=1.05,
+            showarrow=False,
+            font=dict(size=12)
+            )
+    )
+    fig.update_xaxes(tickmode='array', tickvals=mgcsts['mgCST'])
+    fig.update_layout(
+    xaxis=dict(
+        tickangle=0,  # Change the angle of the tick labels
+        tickfont=dict(size=10)  # Change the size of the tick labels
+        ))
     st.plotly_chart(fig, use_container_width=True)
 
 with col3 :
@@ -100,7 +135,29 @@ with col3 :
     
 
     bubble_data['mgCST'] = bubble_data['mgCST'].astype(str)
-    fig = px.scatter(bubble_data, x='mgCST', y = 'old_mgCST', color='mgCST',color_discrete_sequence=list(bubble_color), size='count')
+    fig = px.scatter(bubble_data, x='mgCST', y = 'old_mgCST', color='mgCST',color_discrete_sequence=list(bubble_color), size='count',
+                     title = "Number of samples in previous MgCST vs New MgCST")
+    subtitle_text = f"MinClusterSize = {minclustersize} <br> DeepSplit = {deepsplit}"
+    fig.add_annotation(
+        dict(text=subtitle_text,
+            xref='paper', yref='paper',
+            x=0, y=1.05,
+            showarrow=False,
+            font=dict(size=12)
+            )
+    )
+    fig.update_xaxes(tickmode='array', tickvals=mgcsts['mgCST'])
+    fig.update_yaxes(tickmode='array', tickvals=np.arange(1,28))
+    fig.update_layout(
+    xaxis=dict(
+        tickangle=0,  # Change the angle of the tick labels
+        tickfont=dict(size=10)  # Change the size of the tick labels
+        ),
+    yaxis=dict(
+        tickangle=0,  # Change the angle of the tick labels
+        tickfont=dict(size=10)  # Change the size of the tick labels
+        ),
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 

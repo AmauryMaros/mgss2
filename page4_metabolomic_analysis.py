@@ -4,14 +4,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import matplotlib.colors as mcolors
+import matplotlib.lines as mlines
 from sklearn.decomposition import PCA
 import numpy as np
 import plotly.express as px
 
+# use the full width of the page
 st.set_page_config(layout="wide")
 
 
-# Slider for parameters variation
+# Slider for parameters variation in the sidebar
 st.sidebar.subheader("Parameters")
 parameters = pd.read_csv("Data/mgCSTs_parameters_streamlit.csv")
 value_ds = parameters['deepsplit'].values[0]
@@ -21,7 +23,7 @@ minclustersize = st.sidebar.slider(label="minClusterSize", min_value=10, max_val
 parameters = pd.DataFrame({"minClusterSize" : [minclustersize], "deepsplit" : [deepsplit]})
 parameters.to_csv("Data/mgCSTs_parameters_streamlit.csv", index = False)
 
-# Load Data
+# Data importation
 @st.cache_data
 def read_csv(url):
      return pd.read_csv(url)
@@ -51,6 +53,7 @@ def filter_df(df, minclustersize, deepsplit):
 mgcsts_samples = filter_df(mgcsts_samples_df, minclustersize, deepsplit)
 mgcsts = mgCSTs_sort[(mgCSTs_sort['deepSplit'] == deepsplit) & (mgCSTs_sort['minClusterSize'] == minclustersize)]
 
+# Create dataframe to show differences in number of samples between all/metabolome data
 mgcsts = mgcsts.reset_index(drop = True)
 count_sample = []
 for element in mgcsts['dtc'].values :
@@ -61,8 +64,6 @@ mgcsts['count_sample'] = count_sample
 color_mgCST = mgcsts[['mgCST', 'color_mgCST']].reset_index(drop = True)
 color_mgCST = color_mgCST[color_mgCST['mgCST'].isin(mgCST)]
 
-st.header("PCA - all samples", divider='gray')
-
 # Create a dataframe with PCA datas for visualization
 principal_components = pd.DataFrame(data=principal_components, columns = ['PC1','PC2','PC3'])
 pca_df = pd.concat([sampleID, principal_components,mgCST], axis=1)
@@ -72,9 +73,16 @@ pca_df = pca_df.sort_values(by='mgCST', ascending=True)
 pca_df = pca_df.sort_values('mgCST', ascending=True).reset_index(drop=True)
 pca_df['mgCST'] = pca_df['mgCST'].astype(str)   # to be interpret as categorical column for plotly
 
+
+
+st.header("PCA - all samples", divider='gray')
+
+
+
 st.container()
 col1, col2 = st.columns(2)
 with col1 :
+    ## Seaborn figure
     # fig,f = plt.subplots()
     # f = sns.scatterplot(pca_df, x='PC1', y='PC2', hue='mgCST', palette=list(color_mgCST['color_mgCST'].values), edgecolor = 'black')
     # plt.xlabel('PC1 : ' + str(round(explained_variance[0]*100,2)) + "%")
@@ -85,26 +93,48 @@ with col1 :
     # # df = df.sort_values('mgCST', ascending=True)
     # df['mgCST'] = df['mgCST'].astype(str)
 
+    ## Plotly figure
     fig = px.scatter(pca_df, x='PC1', y='PC2', color='mgCST',
                      color_discrete_sequence=color_mgCST['color_mgCST'].values,
                      title="PCA - colored by mgCSTs",
                      labels = {'PC1' : "PC1 : "+str(round(explained_variance[0]*100,2))+"%",
                                'PC2' : "PC2 : "+str(round(explained_variance[1]*100,2)) + "%"})
+    subtitle_text = f"MinClusterSize = {minclustersize} <br> DeepSplit = {deepsplit}"
+    fig.add_annotation(
+        dict(text=subtitle_text,
+            xref='paper', yref='paper',
+            x=0, y=1.05,
+            showarrow=False,
+            font=dict(size=12)
+            )
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 
+with  col2 :
 
-with  col2 :   
+    ## Seaborn figure
     # fig, g = plt.subplots()
     # g = sns.scatterplot(data = pca_df, x='PC1', y='PC2', hue='Project')
     # plt.xlabel('PC1 : ' + str(round(explained_variance[0]*100,2)) + "%")
     # plt.ylabel('PC2 : ' + str(round(explained_variance[1]*100,2)) + "%")
     # g.legend(title = 'Projects',loc='center',bbox_to_anchor=(1.2, 0.5), fontsize = "7",fancybox=True, shadow=True, ncol = 1)
     # st.pyplot(fig)
+
+    ## Plotly figure
     fig = px.scatter(pca_df, x='PC1', y='PC2', color='Project',
                      title="PCA - colored by projects",
                      labels = {'PC1' : "PC1 : "+str(round(explained_variance[0]*100,2))+"%",
                                'PC2' : "PC2 : "+str(round(explained_variance[1]*100,2)) + "%"})
+    subtitle_text = f"MinClusterSize = {minclustersize} <br> DeepSplit = {deepsplit}"
+    fig.add_annotation(
+        dict(text=subtitle_text,
+            xref='paper', yref='paper',
+            x=0, y=1.05,
+            showarrow=False,
+            font=dict(size=12)
+            )
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 st.container()
@@ -120,18 +150,18 @@ with col2 :
     st.write('Deepsplit : ', deepsplit)
 
 
-# # Comparison of 2 groups
+
 st.header("Comparison between 2 groups", divider='gray')
 
+
+
 st.container()
-# PCA comparison between 2 different mgCST - same figure
 col1, col2 = st.columns(2)
 with col1 :
     mgCST1 = st.slider("GroupA", 1, 41,(1,41), key='mgCST1')    # this return a tuple (a, b)
 with col2 :
     mgCST2 = st.slider("GroupB", 1, 41,(1,41), key='mgCST2')
 
-# st.container()
 @st.cache_data
 def data_pca(m1,m2):
     df1 = mgcsts_samples[mgcsts_samples['mgCST'].isin(range(m1[0],m1[1]+1))]
@@ -152,8 +182,6 @@ new_colors = color_mgCST[color_mgCST['mgCST'].isin(mgCSTs)]
 
 
 run_pca = st.button('Run PCA', key='run_pca')
-
-import matplotlib.lines as mlines
 
 if run_pca :
     # Create and fit your PCA models
@@ -181,6 +209,15 @@ if run_pca :
                          title=pc0+" - "+pc1+" representation",
                          labels = {pc0 : pc0 + " : " + str(round(explained_variance[a]*100,2))+"%",
                                    pc1 : pc1 + " : " + str(round(explained_variance[b]*100,2)) + "%"})
+        subtitle_text = f"MinClusterSize = {minclustersize} <br> DeepSplit = {deepsplit}"
+        fig.add_annotation(
+            dict(text=subtitle_text,
+                xref='paper', yref='paper',
+                x=0, y=1.05,
+                showarrow=False,
+                font=dict(size=12)
+                )
+        )
         return fig
     
     cols = metabolomics.columns
@@ -267,6 +304,15 @@ if run_pca :
                      color='Feature_rank', text='Features', barmode='stack',
                      labels={'PCs':'Principal Component'}, 
                      title='5 most contributing features - Positive correlation')
+        subtitle_text = f"MinClusterSize = {minclustersize} <br> DeepSplit = {deepsplit}"
+        fig.add_annotation(
+            dict(text=subtitle_text,
+                xref='paper', yref='paper',
+                x=0, y=1.05,
+                showarrow=False,
+                font=dict(size=12)
+                )
+        )
         
         st.plotly_chart(fig, theme='streamlit', use_container_width=True)
 
@@ -277,7 +323,15 @@ if run_pca :
                      color='Feature_rank', text='Features', barmode='stack',
                      labels={'PCs':'Principal Component'}, 
                      title='5 most contributing features - Negative correlation')
-        
+        subtitle_text = f"MinClusterSize = {minclustersize} <br> DeepSplit = {deepsplit}"
+        fig.add_annotation(
+            dict(text=subtitle_text,
+                xref='paper', yref='paper',
+                x=0, y=1.05,
+                showarrow=False,
+                font=dict(size=12)
+                )
+    )
         st.plotly_chart(fig, theme='streamlit', use_container_width=True)
 
 
