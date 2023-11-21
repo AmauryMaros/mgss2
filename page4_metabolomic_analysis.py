@@ -140,14 +140,41 @@ with  col2 :
 st.container()
 col1, col2 = st.columns(2)
 with col1 :
+    st.subheader("Number of samples comparison", divider='gray')
     st.write("Metabolome Data : 1280 samples")
     st.dataframe(pd.DataFrame(mgCST.value_counts().sort_index().rename(index = "count_sample")).transpose())
-    st.write("All samples : 2528")
+    st.write("All samples : 2528 samples")
     st.dataframe(mgcsts[['mgCST','count_sample']].set_index('mgCST').transpose())
+
+st.container()
 with col2 :
-    st.write("Clustering parameters")
-    st.write('Minclustersize :', minclustersize)
-    st.write('Deepsplit : ', deepsplit)
+    st.subheader("3D representation", divider='gray')
+    tab1, tab2 = st.tabs(["MgCST", "Project"])
+    with tab1 :
+        fig = px.scatter_3d(pca_df, x='PC1', y='PC2', z='PC3', color='mgCST',
+                        color_discrete_sequence=color_mgCST['color_mgCST'].values,
+                        # title="PCA - colored by mgCSTs",
+                        labels = {'PC1' : "PC1 : "+str(round(explained_variance[0]*100,2))+"%",
+                                'PC2' : "PC2 : "+str(round(explained_variance[1]*100,2)) + "%",
+                                'PC3' : "PC3 : "+str(round(explained_variance[2]*100,2))+"%"})
+
+        fig.update_layout(legend= {'itemsizing': 'constant'})
+        fig.update_traces(marker=dict(size=2, line=dict(width=1)),
+                          selector=dict(mode='markers'))
+        
+        st.plotly_chart(fig, use_container_width=True)
+    with tab2 :
+        fig = px.scatter_3d(pca_df, x='PC1', y='PC2', z='PC3', color='Project',
+                            # title="PCA - colored by projects",
+                            labels = {'PC1' : "PC1 : "+str(round(explained_variance[0]*100,2))+"%",
+                                      'PC2' : "PC2 : "+str(round(explained_variance[1]*100,2)) + "%",
+                                      'PC3' : "PC3 : "+str(round(explained_variance[2]*100,2))+"%"})
+        fig.update_layout(legend= {'itemsizing': 'constant'})
+        fig.update_traces(marker=dict(size=2, line=dict(width=1)),
+                          selector=dict(mode='markers'))
+        
+        st.plotly_chart(fig, use_container_width=True)
+
 
 
 
@@ -333,6 +360,18 @@ if run_pca :
                 )
     )
         st.plotly_chart(fig, theme='streamlit', use_container_width=True)
+
+    # fig = px.scatter_3d(pca_df, x='PC1', y='PC2', z='PC3', color = 'mgCST', symbol='mgCST', color_discrete_sequence=new_legend.values)
+
+    # fig.update_layout(scene=dict(xaxis_title='PC 1',
+    #                             yaxis_title='PC 2',
+    #                             zaxis_title='PC 3'))
+
+    # fig.update_traces(marker=dict(size=2,
+    #                             line=dict(width=2,
+    #                                         color='DarkSlateGrey')),
+    #                 selector=dict(mode='markers'))
+    # st.plotly_chart(fig, theme='streamlit', use_container_width=True)
 
 
 

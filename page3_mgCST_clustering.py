@@ -53,6 +53,7 @@ with col1 :
     # g.grid(False)
     # st.pyplot(fig1)
     fig = px.bar(mgcsts, x='mgCST', y='count_sample', color='mgCST',
+                 hover_data=['domTaxa'],
                  color_discrete_sequence=list(mgcsts['color_mgCST']), 
                  labels={"count_sample" : "Number of samples"},
                  title = "Number of samples on each MgCSTs - colored by mgCST")
