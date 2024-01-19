@@ -1,14 +1,14 @@
 source("R_scripts/00_importation.R")
 
-ngl.abund.clusters.cast <- readRDS("R_scripts/ngl.abund.clusters.cast.RDS")
-mgCST.hclust <- readRDS("R_scripts/mgCST.hclust.RDS")
-mgCST.dist <- readRDS("R_scripts/mgCST.dist.RDS")
+ngl.abund.clusters.cast <- readRDS("R_scripts/ngl.abund.clusters.cast2.RDS")
+mgCST.hclust <- readRDS("R_scripts/mgCST.hclust2.RDS")
+mgCST.dist <- readRDS("R_scripts/mgCST.dist2.RDS")
 
 relabund<-ngl.abund.clusters.cast/rowSums(ngl.abund.clusters.cast)
 
-mgCSTs.sort.df <- read_csv("Data/mgCST_sort_color.csv")
-mgCSTs.samples.df <-read_csv("Data/mgCST_samples_color.csv")
-subspecies.with.colors <- read_csv("Data/subspecies_with_colors.csv")
+mgCSTs.sort.df <- read_csv("Data/mgCST_sort_color2.csv")
+mgCSTs.samples.df <-read_csv("Data/mgCST_samples_color2.csv")
+subspecies.with.colors <- read_csv("Data/subspecies_with_colors2.csv")
 subspecies.with.colors$Subspecies <- gsub("\\.", "_", subspecies.with.colors$Subspecies)
 
 # Define the conditions
