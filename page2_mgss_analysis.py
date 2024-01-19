@@ -4,9 +4,11 @@ from PIL import Image
 
 st.set_page_config(layout="centered")
 
-clust = pd.read_csv("Data/mgss.clustering.parameters.csv").rename(columns={"Unnamed: 0" : "species"})
-mgss_coverage = pd.read_csv("Data/mgSs.coverage.stats.csv").rename(columns={"Unnamed: 0" : "sub_species", "as.factor(sample_cluster)" : "sample_cluster"})
+clust = pd.read_csv("Data/mgss.clustering.parameters2.csv").rename(columns={"Unnamed: 0" : "species"})
+mgss_coverage = pd.read_csv("Data/mgSs.coverage.stats2.csv").rename(columns={"Unnamed: 0" : "sub_species", "as.factor(sample_cluster)" : "sample_cluster"})
 species = mgss_coverage['sub_species'].apply(lambda x : x.split(".")[0]).unique()
+mgss_candidates = pd.read_csv("Data/potential.mgss.candidates.csv")
+
 
 st.title("Metagenomic Subspecies")
 
@@ -19,11 +21,11 @@ with tab1:
         
         col1, col2 = st.columns(2)
         with col1 :
-            fig1 = Image.open("Medias/mgss_coverage_png/" + option + "_subspecies_coverage_boxplot.png") 
+            fig1 = Image.open("Medias/mgss_coverage_png2/" + option + "_subspecies_coverage_boxplot2.png") 
             st.image(fig1)
 
         with col2 :
-            fig2 = Image.open("Medias/mgss_coverage_png/" + option + "_subspecies_coverage_by_NoGenes.png")
+            fig2 = Image.open("Medias/mgss_coverage_png2/" + option + "_subspecies_coverage_by_NoGenes2.png")
             st.image(fig2)
 
 with tab2 :
@@ -36,5 +38,8 @@ with tab2 :
         st.dataframe(mgss_coverage[mgss_coverage['sub_species'].apply(lambda x : x.split(".")[0]) == option])
 
 with tab3 :
-        image = Image.open("Medias/heatmap_presence_absence/_" + option + "_heatmap_presence_absence.png")
+        image = Image.open("Medias/heatmap_presence_absence2/_" + option + "_heatmap_presence_absence.png")
         st.image(image)
+
+st.caption("Percentage of samples that contains more than a specific percentage of protein count")
+st.dataframe(mgss_candidates[mgss_candidates['species'] == option])

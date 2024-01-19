@@ -27,17 +27,17 @@ parameters.to_csv("Data/mgCSTs_parameters_streamlit.csv", index = False)
 @st.cache_data
 def read_csv(url):
      return pd.read_csv(url)
-mgcsts_samples_df = read_csv("Data/mgCSTs.samples.df.csv")
+mgcsts_samples_df = read_csv("Data/mgCSTs.samples.df2.csv")
 project = read_csv("Data/VIRGO2_projects.csv")
-mgCSTs_sort = read_csv("Data/mgCST_sort_color.csv")
+mgCSTs_sort = read_csv("Data/mgCST_sort_color2.csv")
 
 @st.cache_data
 def read_pickle(path):
     with open(path, 'rb') as file:
         df = pickle.load(file)
     return df
-metabolomics = read_pickle("/Users/amaros/Desktop/mgss2/log_norm.pkl")      # change this path
-pca_model =  read_pickle("Data/pca_model.pkl")
+metabolomics = read_pickle("/Users/amaros/OneDrive - University of Maryland School of Medicine/mgss2/python_to_R_files_construction/log_norm.pkl")      # change this path
+pca_model =  read_pickle("Data/pca_model2.pkl")
 
 @st.cache_data
 def pca_model_data(minclustersize, deepsplit):

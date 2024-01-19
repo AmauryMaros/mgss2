@@ -45,7 +45,7 @@ color_mgcst <- character()
 for (element in mgCSTs.samples$mgCST){
   color_mgcst <- append(color_mgcst, as.character(mgCST[mgCST$mgCST == element, "color_mgCST"]))
 }
-color_mgcst
+# color_mgcst
 mgCSTs.samples$color_mgCST <- color_mgcst
 
 z<-rownames(relabund)

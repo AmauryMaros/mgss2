@@ -9,9 +9,9 @@ import numpy as np
 
 st.set_page_config(layout="wide")
 
-subspecies_with_colors = pd.read_csv("Data/subspecies_with_colors.csv")
-mgcsts_samples_df = pd.read_csv("Data/mgCSTs.samples.df.csv")
-mgCSTs_sort = pd.read_csv("Data/mgCST_sort_color.csv")
+# subspecies_with_colors = pd.read_csv("Data/subspecies_with_colors.csv")
+mgcsts_samples_df = pd.read_csv("Data/mgCSTs.samples.df2.csv")
+mgCSTs_sort = pd.read_csv("Data/mgCST_sort_color2.csv")
 projects = pd.read_csv("Data/VIRGO2_projects.csv")
 
 
